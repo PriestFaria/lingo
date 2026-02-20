@@ -1,19 +1,19 @@
 package filters
 
 import (
-	"go/ast"
-
-	"golang.org/x/tools/go/analysis"
+	"go/token"
+	"lingo/internal/analyzer/log"
 )
 
-type LogContext struct {
-	Pass *analysis.Pass
-	CallExpr *ast.CallExpr
-	Parts []string 
-	FullText string
+type Suggestion struct {
+	Message string
+	Replace string
+	Start token.Pos
+	End token.Pos
 }
 
 
+
 type LogFilter interface {
-	Apply(context *LogContext) bool
+	Apply(context *log.LogContext) 
 }
