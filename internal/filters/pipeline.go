@@ -14,8 +14,11 @@ func NewFilterPipeline(filters []LogFilter) *FilterPipeline {
 }
 
 
-func (p *FilterPipeline) Process(context *log.LogContext){
+func (p *FilterPipeline) Process(context *log.LogContext) []FilterIssue {
+	var allIssues []FilterIssue
 	for _, f := range p.filters {
-		f.Apply(context) 
+		issues := f.Apply(context)
+		allIssues = append(allIssues, issues...)
 	}
+	return allIssues
 }

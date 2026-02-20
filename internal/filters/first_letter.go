@@ -5,4 +5,6 @@ import "lingo/internal/analyzer/log"
 type FirstLetterFilter struct {}
 
 
-func (f *FirstLetterFilter) Apply(context *log.LogContext) {}
+func (f *FirstLetterFilter) Apply(context *log.LogContext) []FilterIssue {
+	return []FilterIssue{}
+}

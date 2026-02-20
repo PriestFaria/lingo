@@ -1,7 +1,11 @@
 package filters
 
-import "lingo/internal/analyzer/log"
+import (
+	"lingo/internal/analyzer/log"
+)
 
 type EmojiStrictFilter struct {}
 
-func (f *EmojiStrictFilter) Apply(context *log.LogContext) {}
+func (f *EmojiStrictFilter) Apply(context *log.LogContext) []FilterIssue {
+	return []FilterIssue{}
+}
