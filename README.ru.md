@@ -34,10 +34,10 @@
 **Требования:** Go 1.22+
 
 ```bash
-git clone https://github.com/PriestFaria/lingo.git
-cd lingo
-go build -o lingo ./cmd/lingo
+go install github.com/PriestFaria/lingo/cmd/lingo@latest
 ```
+
+Бинарник будет доступен как `lingo` в `$(go env GOPATH)/bin`.
 
 ---
 
@@ -47,19 +47,23 @@ go build -o lingo ./cmd/lingo
 
 ```bash
 # Все фильтры включены, настройки по умолчанию
-go vet -vettool=./lingo ./...
+go vet -vettool=$(go env GOPATH)/bin/lingo ./...
 
 # С конфигурационным файлом
-go vet -vettool=./lingo -config=.lingo.json ./...
+go vet -vettool=$(go env GOPATH)/bin/lingo -config=.lingo.json ./...
 ```
 
 ### Плагин для golangci-lint (Linux / macOS)
 
-**1. Сборка плагина**
+**1. Клонировать и собрать плагин**
 
 ```bash
-go build -buildmode=plugin -o lingo.so ./plugin/
+git clone https://github.com/PriestFaria/lingo.git
+cd lingo
+go build -buildmode=plugin -o /path/to/your/project/lingo.so ./plugin/
 ```
+
+> Плагин требует сборки из исходников — это ограничение Go plugin system.
 
 **2. Конфигурация `.golangci.yml`**
 
@@ -140,12 +144,12 @@ lingo настраивается через файл `.lingo.json` или inline
 ```go
 // ❌ нарушения, которые найдёт lingo
 
-log.Info("Starting server on port 8080")   // должна быть строчная буква
-log.Info("запуск сервера")                 // только английский
-log.Info("server started 🚀")              // нет эмодзи
-log.Error("connection failed!!!")          // нет повторяющейся пунктуации
-log.Info("user password: " + password)     // чувствительные данные в литерале
-log.Debug("api key", zap.String("key", k)) // чувствительное имя переменной
+log.Info("Starting server on port 8080")    // должна быть строчная буква
+log.Info("запуск сервера")                  // только английский
+log.Info("server started 🚀")               // нет эмодзи
+log.Error("connection failed!!!")           // нет повторяющейся пунктуации
+log.Info("user password: " + password)      // чувствительные данные в литерале
+log.Debug("api key", zap.String("key", k))  // чувствительное имя переменной
 ```
 
 ```go

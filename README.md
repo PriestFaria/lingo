@@ -17,7 +17,7 @@ Catches style violations and potential data leaks in calls to `log`, `log/slog`,
 | 3   | No **emoji** or repeated punctuation (`!!`, `...`)             | `log.Info("done! 🚀")`         |
 | 4   | No **sensitive data** keywords (`password`, `token`, `key`, …) | `log.Info("user token: " + t)` |
 
-Rules 1 and 3 (first letter) support **auto-fix** via `suggested fixes`.
+Rule 1 (first letter) supports **auto-fix** via `suggested fixes`.
 
 ## Supported loggers
 
@@ -34,10 +34,10 @@ Format methods (`Printf`, `Infof`, …) are fully supported.
 **Requirements:** Go 1.22+
 
 ```bash
-git clone https://github.com/PriestFaria/lingo.git
-cd lingo
-go build -o lingo ./cmd/lingo
+go install github.com/PriestFaria/lingo/cmd/lingo@latest
 ```
+
+The binary will be available as `lingo` in `$(go env GOPATH)/bin`.
 
 ---
 
@@ -47,19 +47,23 @@ go build -o lingo ./cmd/lingo
 
 ```bash
 # All filters enabled, default settings
-go vet -vettool=./lingo ./...
+go vet -vettool=$(go env GOPATH)/bin/lingo ./...
 
 # With a config file
-go vet -vettool=./lingo -config=.lingo.json ./...
+go vet -vettool=$(go env GOPATH)/bin/lingo -config=.lingo.json ./...
 ```
 
 ### golangci-lint plugin (Linux / macOS)
 
-**1. Build the plugin**
+**1. Clone and build the plugin**
 
 ```bash
-go build -buildmode=plugin -o lingo.so ./plugin/
+git clone https://github.com/PriestFaria/lingo.git
+cd lingo
+go build -buildmode=plugin -o /path/to/your/project/lingo.so ./plugin/
 ```
+
+> The plugin requires building from source — this is a limitation of the Go plugin system.
 
 **2. Configure `.golangci.yml`**
 
@@ -140,12 +144,12 @@ Custom keywords are added on top via `extra_keywords`.
 ```go
 // ❌ violations lingo will report
 
-log.Info("Starting server on port 8080")   // must start with lowercase
-log.Info("запуск сервера")                 // must be in English
-log.Info("server started 🚀")              // no emoji
-log.Error("connection failed!!!")          // no repeated punctuation
-log.Info("user password: " + password)     // sensitive data in literal
-log.Debug("api key", zap.String("key", k)) // sensitive variable name
+log.Info("Starting server on port 8080")    // must start with lowercase
+log.Info("запуск сервера")                  // must be in English
+log.Info("server started 🚀")               // no emoji
+log.Error("connection failed!!!")           // no repeated punctuation
+log.Info("user password: " + password)      // sensitive data in literal
+log.Debug("api key", zap.String("key", k))  // sensitive variable name
 ```
 
 ```go
