@@ -4,6 +4,7 @@ Static analyzer for Go log messages.
 Catches style violations and potential data leaks in calls to `log`, `log/slog`, and `go.uber.org/zap`.
 
 [![CI](https://github.com/PriestFaria/lingo/actions/workflows/ci.yml/badge.svg)](https://github.com/PriestFaria/lingo/actions/workflows/ci.yml)
+&nbsp;[🇷🇺 Русский](README.ru.md)
 
 ---
 
