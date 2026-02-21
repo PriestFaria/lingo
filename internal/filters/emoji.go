@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"unicode"
 
-	"lingo/internal/analyzer/log"
+	"github.com/PriestFaria/lingo/internal/analyzer/log"
 )
 
 // EmojiStrictFilter reports log messages that contain emoji characters or

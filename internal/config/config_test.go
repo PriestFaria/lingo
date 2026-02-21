@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"lingo/internal/config"
+	"github.com/PriestFaria/lingo/internal/config"
 )
 
 func TestLoad_EmptyPath_ReturnsDefault(t *testing.T) {

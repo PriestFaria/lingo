@@ -3,7 +3,7 @@ package filters
 import (
 	"go/token"
 
-	"lingo/internal/analyzer/log"
+	"github.com/PriestFaria/lingo/internal/analyzer/log"
 )
 
 // makeParts creates a []LogPart from alternating (value string, isLiteral bool) pairs.

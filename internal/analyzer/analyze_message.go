@@ -2,9 +2,9 @@ package analyzer
 
 import (
 	"go/ast"
-	"lingo/internal/analyzer/log"
-	"lingo/internal/config"
-	"lingo/internal/filters"
+	"github.com/PriestFaria/lingo/internal/analyzer/log"
+	"github.com/PriestFaria/lingo/internal/config"
+	"github.com/PriestFaria/lingo/internal/filters"
 	"strings"
 
 	"golang.org/x/tools/go/analysis"

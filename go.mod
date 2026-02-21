@@ -1,4 +1,4 @@
-module lingo
+module github.com/PriestFaria/lingo
 
 go 1.25.5
 

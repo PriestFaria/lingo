@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"lingo/internal/analyzer/log"
-	"lingo/internal/config"
+	"github.com/PriestFaria/lingo/internal/analyzer/log"
+	"github.com/PriestFaria/lingo/internal/config"
 
 	"golang.org/x/tools/go/analysis"
 )

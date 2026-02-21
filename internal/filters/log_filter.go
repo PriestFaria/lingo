@@ -1,7 +1,7 @@
 package filters
 
 import (
-	"lingo/internal/analyzer/log"
+	"github.com/PriestFaria/lingo/internal/analyzer/log"
 )
 
 // LogFilter is the interface implemented by all log message filters.

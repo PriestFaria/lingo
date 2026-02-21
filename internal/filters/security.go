@@ -5,7 +5,7 @@ import (
 	"strings"
 	"unicode"
 
-	"lingo/internal/analyzer/log"
+	"github.com/PriestFaria/lingo/internal/analyzer/log"
 )
 
 // SecurityFilter reports log messages that may expose sensitive data.

@@ -5,7 +5,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"lingo/internal/analyzer/log"
+	"github.com/PriestFaria/lingo/internal/analyzer/log"
 )
 
 // FirstLetterFilter reports log messages whose first literal part starts with

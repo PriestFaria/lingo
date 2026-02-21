@@ -40,8 +40,8 @@ import (
 
 	"golang.org/x/tools/go/analysis"
 
-	"lingo/internal/analyzer"
-	"lingo/internal/config"
+	"github.com/PriestFaria/lingo/internal/analyzer"
+	"github.com/PriestFaria/lingo/internal/config"
 )
 
 // New is the constructor called by golangci-lint's Go plugin system.

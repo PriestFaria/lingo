@@ -1,7 +1,7 @@
 package main
 
 import (
-	"lingo/internal/analyzer"
+	"github.com/PriestFaria/lingo/internal/analyzer"
 
 	"golang.org/x/tools/go/analysis/singlechecker"
 )

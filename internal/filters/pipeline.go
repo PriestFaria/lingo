@@ -1,6 +1,6 @@
 package filters
 
-import "lingo/internal/analyzer/log"
+import "github.com/PriestFaria/lingo/internal/analyzer/log"
 
 // FilterPipeline runs a sequence of LogFilters and collects all issues.
 type FilterPipeline struct {

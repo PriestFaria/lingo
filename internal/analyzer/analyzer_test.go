@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"lingo/internal/analyzer"
+	"github.com/PriestFaria/lingo/internal/analyzer"
 
 	"golang.org/x/tools/go/analysis/analysistest"
 )

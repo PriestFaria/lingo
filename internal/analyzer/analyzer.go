@@ -3,7 +3,7 @@ package analyzer
 import (
 	"go/ast"
 
-	"lingo/internal/config"
+	"github.com/PriestFaria/lingo/internal/config"
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"

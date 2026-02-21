@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"unicode"
 
-	"lingo/internal/analyzer/log"
+	"github.com/PriestFaria/lingo/internal/analyzer/log"
 )
 
 // EnglishFilter reports log messages that contain non-ASCII letters,
