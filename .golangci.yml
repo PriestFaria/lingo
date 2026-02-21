@@ -1,0 +1,29 @@
+# golangci-lint configuration for using lingo as a custom plugin.
+#
+# Prerequisites:
+#   1. Build the plugin .so:
+#      go build -buildmode=plugin -o lingo.so ./plugin/
+#   2. Run golangci-lint:
+#      golangci-lint run ./...
+
+version: "2"
+
+linters:
+  enable:
+    - lingo
+
+linters-settings:
+  custom:
+    lingo:
+      # type: goplugin — load from a compiled .so file (Linux/macOS only).
+      type: goplugin
+      # Path to the compiled plugin binary.
+      path: ./lingo.so
+      description: "Linter for log messages: lowercase start, English only, no emoji, no sensitive data"
+      original-url: https://github.com/PriestFaria/lingo
+      # settings are passed as conf to the plugin's New() function.
+      # Supported keys:
+      #   config (string): path to a .lingo.json file.
+      # Omit settings entirely to use defaults (all filters on, no extra keywords).
+      settings:
+        config: .lingo.json

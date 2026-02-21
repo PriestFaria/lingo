@@ -25,12 +25,28 @@ var Analyzer *analysis.Analyzer = &analysis.Analyzer{
 	},
 }
 
+func NewAnalyzerWithConfig(cfg *config.Config) *analysis.Analyzer {
+	return &analysis.Analyzer{
+		Name: "lingo",
+		Doc:  "Lingo is a static analysis tool that detects logs issues, such as first-letter-case, language strict and leaking business information.",
+		Run: func(pass *analysis.Pass) (interface{}, error) {
+			return runWithConfig(pass, cfg)
+		},
+		Requires: []*analysis.Analyzer{
+			inspect.Analyzer,
+		},
+	}
+}
+
 func run(pass *analysis.Pass) (interface{}, error) {
 	cfg, err := config.Load(configPath)
 	if err != nil {
 		return nil, err
 	}
+	return runWithConfig(pass, cfg)
+}
 
+func runWithConfig(pass *analysis.Pass, cfg *config.Config) (interface{}, error) {
 	inspector := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 	nodeFilter := []ast.Node{
 		(*ast.CallExpr)(nil),
