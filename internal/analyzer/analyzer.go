@@ -25,6 +25,8 @@ var Analyzer *analysis.Analyzer = &analysis.Analyzer{
 	},
 }
 
+// NewAnalyzerWithConfig creates a lingo analyzer pre-configured with cfg,
+// bypassing the -config flag. Intended for use in the golangci-lint plugin.
 func NewAnalyzerWithConfig(cfg *config.Config) *analysis.Analyzer {
 	return &analysis.Analyzer{
 		Name: "lingo",
@@ -46,6 +48,8 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	return runWithConfig(pass, cfg)
 }
 
+// runWithConfig walks the AST of the package under analysis and routes
+// recognised log call expressions to the appropriate handler.
 func runWithConfig(pass *analysis.Pass, cfg *config.Config) (interface{}, error) {
 	inspector := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 	nodeFilter := []ast.Node{

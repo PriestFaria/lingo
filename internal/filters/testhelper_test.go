@@ -6,8 +6,8 @@ import (
 	"lingo/internal/analyzer/log"
 )
 
-// makeParts — быстрое создание []LogPart для юнит-тестов.
-// Каждая пара (value, isLiteral) → LogPart с фиктивными позициями.
+// makeParts creates a []LogPart from alternating (value string, isLiteral bool) pairs.
+// Positions are synthetic and suitable for unit tests only.
 func makeParts(args ...interface{}) []log.LogPart {
 	var parts []log.LogPart
 	for i := 0; i+1 < len(args); i += 2 {

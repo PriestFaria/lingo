@@ -13,6 +13,9 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
+// collectPartsFromExpr recursively decomposes an AST expression into LogParts.
+// It handles string concatenation (BinaryExpr with ADD), string literals
+// (BasicLit), and identifiers (Ident).
 func collectPartsFromExpr(expr ast.Expr, info *types.Info) []log.LogPart {
 	switch e := expr.(type) {
 	case *ast.BinaryExpr:
@@ -45,10 +48,15 @@ func collectPartsFromExpr(expr ast.Expr, info *types.Info) []log.LogPart {
 	return nil
 }
 
+// isFormatMethod reports whether name is a format-style method (e.g. Printf,
+// Infof) by checking for a trailing "f" suffix (case-insensitive).
 func isFormatMethod(name string) bool {
 	return strings.HasSuffix(strings.ToLower(name), "f")
 }
 
+// collectArgs extracts LogParts from a call expression.
+// For format methods the format string (Args[0]) and all value arguments are
+// collected; for regular methods only the first argument is used.
 func collectArgs(callExpr *ast.CallExpr, info *types.Info) []log.LogPart {
 	if len(callExpr.Args) == 0 {
 		return nil
@@ -67,6 +75,7 @@ func collectArgs(callExpr *ast.CallExpr, info *types.Info) []log.LogPart {
 	return parts
 }
 
+// handleLog processes a call to the standard library "log" package.
 func handleLog(pass *analysis.Pass, callExpr *ast.CallExpr, cfg *config.Config) {
 	parts := collectArgs(callExpr, pass.TypesInfo)
 	if len(parts) == 0 {
@@ -75,6 +84,8 @@ func handleLog(pass *analysis.Pass, callExpr *ast.CallExpr, cfg *config.Config) 
 	analyzeMessage(pass, callExpr, parts, cfg)
 }
 
+// handleSlog processes a call to the "log/slog" package.
+// Only the first argument (the message string) is inspected.
 func handleSlog(pass *analysis.Pass, callExpr *ast.CallExpr, cfg *config.Config) {
 	if len(callExpr.Args) == 0 {
 		return
@@ -86,6 +97,7 @@ func handleSlog(pass *analysis.Pass, callExpr *ast.CallExpr, cfg *config.Config)
 	analyzeMessage(pass, callExpr, parts, cfg)
 }
 
+// handleZap processes a call to "go.uber.org/zap".
 func handleZap(pass *analysis.Pass, callExpr *ast.CallExpr, cfg *config.Config) {
 	parts := collectArgs(callExpr, pass.TypesInfo)
 	if len(parts) == 0 {

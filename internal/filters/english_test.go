@@ -32,7 +32,7 @@ func TestEnglishFilter(t *testing.T) {
 			wantIssues: 1,
 		},
 		{
-			name:       "non-literal cyrillic — ok (не проверяем переменные)",
+			name:       "non-literal cyrillic — ok (variables are not checked)",
 			value:      "кириллица",
 			isLiteral:  false,
 			wantIssues: 0,
@@ -62,7 +62,8 @@ func TestEnglishFilter(t *testing.T) {
 	}
 }
 
-// Одна issue на часть (не на каждый символ).
+// TestEnglishFilter_OncePerPart verifies that at most one issue is reported per
+// part, regardless of how many non-ASCII characters are present.
 func TestEnglishFilter_OncePerPart(t *testing.T) {
 	f := &EnglishFilter{}
 	ctx := makeCtx(makeParts("привет мир", true))
@@ -72,7 +73,8 @@ func TestEnglishFilter_OncePerPart(t *testing.T) {
 	}
 }
 
-// Несколько частей с нарушениями — одна issue на каждую.
+// TestEnglishFilter_MultiplePartsWithIssues verifies that each violating part
+// produces exactly one issue.
 func TestEnglishFilter_MultiplePartsWithIssues(t *testing.T) {
 	f := &EnglishFilter{}
 	ctx := makeCtx(makeParts("привет", true, "мир", true))

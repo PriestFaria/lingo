@@ -44,7 +44,7 @@ func TestSecurityFilter(t *testing.T) {
 			wantIssues: 1,
 		},
 		{
-			name:       "variable named userPassword — issue (содержит keyword)",
+			name:       "variable named userPassword — issue (contains keyword)",
 			value:      "userPassword",
 			isLiteral:  false,
 			wantIssues: 1,

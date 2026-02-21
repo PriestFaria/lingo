@@ -10,6 +10,7 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
+// buildFullText concatenates the Value fields of all parts into a single string.
 func buildFullText(parts []log.LogPart) string {
 	var sb strings.Builder
 	for _, p := range parts {
@@ -18,6 +19,8 @@ func buildFullText(parts []log.LogPart) string {
 	return sb.String()
 }
 
+// analyzeMessage builds a LogContext from parts, constructs the filter pipeline
+// according to cfg, and reports any issues found via pass.Report/pass.Reportf.
 func analyzeMessage(pass *analysis.Pass, callExpr *ast.CallExpr, parts []log.LogPart, cfg *config.Config) {
 	context := &log.LogContext{
 		Pass:     pass,

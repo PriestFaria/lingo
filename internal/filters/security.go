@@ -8,10 +8,16 @@ import (
 	"lingo/internal/analyzer/log"
 )
 
+// SecurityFilter reports log messages that may expose sensitive data.
+// It checks both string literals (for marker words such as "password:") and
+// variable names (for identifiers like passwordHash or auth_token).
+// ExtraKeywords extends the built-in sensitive keyword list.
 type SecurityFilter struct {
 	ExtraKeywords []string
 }
 
+// allKeywords returns the merged list of built-in and extra sensitive keywords,
+// with all entries normalised to lowercase.
 func (f *SecurityFilter) allKeywords() []string {
 	if len(f.ExtraKeywords) == 0 {
 		return sensitiveKeywords
@@ -36,6 +42,7 @@ var sensitiveKeywords = []string{
 	"key",
 }
 
+// splitWords splits a camelCase or snake_case identifier into lowercase words.
 func splitWords(s string) []string {
 	var words []string
 	var cur strings.Builder
@@ -60,6 +67,8 @@ func splitWords(s string) []string {
 	return words
 }
 
+// containsSensitiveKeyword reports whether any word extracted from name (via
+// splitWords) exactly matches a keyword. Used for variable name checks.
 func containsSensitiveKeyword(name string, keywords []string) (string, bool) {
 	words := splitWords(name)
 	for _, word := range words {
@@ -72,6 +81,8 @@ func containsSensitiveKeyword(name string, keywords []string) (string, bool) {
 	return "", false
 }
 
+// containsSensitiveKeywordInLiteral reports whether any token in value (split
+// by common delimiters) exactly matches a keyword. Used for literal checks.
 func containsSensitiveKeywordInLiteral(value string, keywords []string) (string, bool) {
 	lower := strings.ToLower(value)
 	words := strings.FieldsFunc(lower, func(r rune) bool {

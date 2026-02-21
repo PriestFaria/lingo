@@ -7,11 +7,14 @@ import (
 	"lingo/internal/analyzer/log"
 )
 
+// EmojiStrictFilter reports log messages that contain emoji characters or
+// repeated punctuation sequences (e.g. !!, ???, ...).
 type EmojiStrictFilter struct{}
 
-// Повторяющиеся спецсимволы: !! ??? ... и т.д.
+// repeatedPunct matches two or more consecutive ! or ? and two or more dots.
 var repeatedPunct = regexp.MustCompile(`[!?]{2,}|\.{2,}`)
 
+// isEmoji reports whether the rune falls within a known emoji Unicode range.
 func isEmoji(r rune) bool {
 	return (r >= 0x1F600 && r <= 0x1F64F) || // Emoticons
 		(r >= 0x1F300 && r <= 0x1F5FF) || // Misc Symbols & Pictographs

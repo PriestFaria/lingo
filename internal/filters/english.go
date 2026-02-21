@@ -7,6 +7,8 @@ import (
 	"lingo/internal/analyzer/log"
 )
 
+// EnglishFilter reports log messages that contain non-ASCII letters,
+// indicating the message is not written in English.
 type EnglishFilter struct{}
 
 func (f *EnglishFilter) Apply(context *log.LogContext) []FilterIssue {

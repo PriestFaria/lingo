@@ -8,6 +8,8 @@ import (
 	"lingo/internal/analyzer/log"
 )
 
+// FirstLetterFilter reports log messages whose first literal part starts with
+// an uppercase letter and provides an automatic fix to lowercase it.
 type FirstLetterFilter struct{}
 
 func (f *FirstLetterFilter) Apply(context *log.LogContext) []FilterIssue {
