@@ -8,7 +8,21 @@ import (
 	"lingo/internal/analyzer/log"
 )
 
-type SecurityFilter struct{}
+type SecurityFilter struct {
+	ExtraKeywords []string
+}
+
+func (f *SecurityFilter) allKeywords() []string {
+	if len(f.ExtraKeywords) == 0 {
+		return sensitiveKeywords
+	}
+	all := make([]string, len(sensitiveKeywords), len(sensitiveKeywords)+len(f.ExtraKeywords))
+	copy(all, sensitiveKeywords)
+	for _, kw := range f.ExtraKeywords {
+		all = append(all, strings.ToLower(kw))
+	}
+	return all
+}
 
 var sensitiveKeywords = []string{
 	"password", "passwd", "pass",
@@ -46,10 +60,10 @@ func splitWords(s string) []string {
 	return words
 }
 
-func containsSensitiveKeyword(name string) (string, bool) {
+func containsSensitiveKeyword(name string, keywords []string) (string, bool) {
 	words := splitWords(name)
 	for _, word := range words {
-		for _, kw := range sensitiveKeywords {
+		for _, kw := range keywords {
 			if word == kw {
 				return kw, true
 			}
@@ -58,13 +72,13 @@ func containsSensitiveKeyword(name string) (string, bool) {
 	return "", false
 }
 
-func containsSensitiveKeywordInLiteral(value string) (string, bool) {
+func containsSensitiveKeywordInLiteral(value string, keywords []string) (string, bool) {
 	lower := strings.ToLower(value)
 	words := strings.FieldsFunc(lower, func(r rune) bool {
 		return r == ' ' || r == ':' || r == '=' || r == '_' || r == '-' || r == '/'
 	})
 	for _, word := range words {
-		for _, kw := range sensitiveKeywords {
+		for _, kw := range keywords {
 			if word == kw {
 				return kw, true
 			}
@@ -74,17 +88,18 @@ func containsSensitiveKeywordInLiteral(value string) (string, bool) {
 }
 
 func (f *SecurityFilter) Apply(context *log.LogContext) []FilterIssue {
+	keywords := f.allKeywords()
 	var issues []FilterIssue
 	for _, part := range context.Parts {
 		if part.IsLiteral {
-			if kw, ok := containsSensitiveKeywordInLiteral(part.Value); ok {
+			if kw, ok := containsSensitiveKeywordInLiteral(part.Value, keywords); ok {
 				issues = append(issues, FilterIssue{
 					Message: fmt.Sprintf("log message may expose sensitive data: literal contains %q", kw),
 					Pos:     part.Pos,
 				})
 			}
 		} else {
-			if kw, ok := containsSensitiveKeyword(part.Value); ok {
+			if kw, ok := containsSensitiveKeyword(part.Value, keywords); ok {
 				issues = append(issues, FilterIssue{
 					Message: fmt.Sprintf("log message may expose sensitive data: variable %q matches keyword %q", part.Value, kw),
 					Pos:     part.Pos,

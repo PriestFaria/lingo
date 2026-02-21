@@ -3,10 +3,18 @@ package analyzer
 import (
 	"go/ast"
 
+	"lingo/internal/config"
+
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
 	"golang.org/x/tools/go/ast/inspector"
 )
+
+var configPath string
+
+func init() {
+	Analyzer.Flags.StringVar(&configPath, "config", "", "path to lingo config file (.lingo.json)")
+}
 
 var Analyzer *analysis.Analyzer = &analysis.Analyzer{
 	Name: "lingo",
@@ -18,6 +26,11 @@ var Analyzer *analysis.Analyzer = &analysis.Analyzer{
 }
 
 func run(pass *analysis.Pass) (interface{}, error) {
+	cfg, err := config.Load(configPath)
+	if err != nil {
+		return nil, err
+	}
+
 	inspector := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 	nodeFilter := []ast.Node{
 		(*ast.CallExpr)(nil),
@@ -46,12 +59,12 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		}
 
 		switch pkgPath {
-		case  "go.uber.org/zap":
-			handleZap(pass, callExpession)
+		case "go.uber.org/zap":
+			handleZap(pass, callExpession, cfg)
 		case "log/slog":
-			handleSlog(pass, callExpession)
+			handleSlog(pass, callExpession, cfg)
 		case "log":
-			handleLog(pass, callExpession)	
+			handleLog(pass, callExpession, cfg)
 		}
 	})
 	return nil, nil

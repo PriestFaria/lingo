@@ -138,6 +138,51 @@ func TestSecurityFilter_EmptyParts(t *testing.T) {
 	}
 }
 
+func TestSecurityFilter_ExtraKeywords_LiteralMatch(t *testing.T) {
+	f := &SecurityFilter{ExtraKeywords: []string{"cvv", "ssn"}}
+	ctx := makeCtx(makeParts("processing cvv", true))
+	issues := f.Apply(ctx)
+	if len(issues) != 1 {
+		t.Errorf("got %d issues, want 1 for extra keyword in literal", len(issues))
+	}
+}
+
+func TestSecurityFilter_ExtraKeywords_VariableMatch(t *testing.T) {
+	f := &SecurityFilter{ExtraKeywords: []string{"cvv", "ssn"}}
+	ctx := makeCtx(makeParts("ssnNumber", false))
+	issues := f.Apply(ctx)
+	if len(issues) != 1 {
+		t.Errorf("got %d issues, want 1 for extra keyword in variable name", len(issues))
+	}
+}
+
+func TestSecurityFilter_ExtraKeywords_CaseInsensitive(t *testing.T) {
+	f := &SecurityFilter{ExtraKeywords: []string{"OTP", "CVV"}}
+	ctx := makeCtx(makeParts("otp code", true))
+	issues := f.Apply(ctx)
+	if len(issues) != 1 {
+		t.Errorf("got %d issues, want 1 for case-insensitive extra keyword", len(issues))
+	}
+}
+
+func TestSecurityFilter_ExtraKeywords_NoFalsePositive(t *testing.T) {
+	f := &SecurityFilter{ExtraKeywords: []string{"ssn"}}
+	ctx := makeCtx(makeParts("session", false))
+	issues := f.Apply(ctx)
+	if len(issues) != 0 {
+		t.Errorf("got %d issues, want 0: 'session' should not match keyword 'ssn'", len(issues))
+	}
+}
+
+func TestSecurityFilter_ExtraKeywords_MergedWithDefaults(t *testing.T) {
+	f := &SecurityFilter{ExtraKeywords: []string{"cvv"}}
+	ctx := makeCtx(makeParts("password", false))
+	issues := f.Apply(ctx)
+	if len(issues) != 1 {
+		t.Errorf("got %d issues, want 1: built-in 'password' should still be detected", len(issues))
+	}
+}
+
 func TestSecurityFilter_MultipleVariables(t *testing.T) {
 	f := &SecurityFilter{}
 	parts := makeParts(

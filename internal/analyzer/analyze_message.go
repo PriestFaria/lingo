@@ -3,6 +3,7 @@ package analyzer
 import (
 	"go/ast"
 	"lingo/internal/analyzer/log"
+	"lingo/internal/config"
 	"lingo/internal/filters"
 	"strings"
 
@@ -17,7 +18,7 @@ func buildFullText(parts []log.LogPart) string {
 	return sb.String()
 }
 
-func analyzeMessage(pass *analysis.Pass, callExpr *ast.CallExpr, parts []log.LogPart) {
+func analyzeMessage(pass *analysis.Pass, callExpr *ast.CallExpr, parts []log.LogPart, cfg *config.Config) {
 	context := &log.LogContext{
 		Pass:     pass,
 		CallExpr: callExpr,
@@ -25,12 +26,23 @@ func analyzeMessage(pass *analysis.Pass, callExpr *ast.CallExpr, parts []log.Log
 		FullText: buildFullText(parts),
 	}
 
-	pipeline := filters.NewFilterPipeline([]filters.LogFilter{
-		&filters.FirstLetterFilter{},
-		&filters.EnglishFilter{},
-		&filters.EmojiStrictFilter{},
-		&filters.SecurityFilter{},
-	})
+	var activeFilters []filters.LogFilter
+	if cfg.Filters.IsEnabled("first_letter") {
+		activeFilters = append(activeFilters, &filters.FirstLetterFilter{})
+	}
+	if cfg.Filters.IsEnabled("english") {
+		activeFilters = append(activeFilters, &filters.EnglishFilter{})
+	}
+	if cfg.Filters.IsEnabled("emoji") {
+		activeFilters = append(activeFilters, &filters.EmojiStrictFilter{})
+	}
+	if cfg.Filters.IsEnabled("security") {
+		activeFilters = append(activeFilters, &filters.SecurityFilter{
+			ExtraKeywords: cfg.Security.ExtraKeywords,
+		})
+	}
+
+	pipeline := filters.NewFilterPipeline(activeFilters)
 
 	issues := pipeline.Process(context)
 	for _, issue := range issues {

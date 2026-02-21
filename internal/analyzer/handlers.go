@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"lingo/internal/analyzer/log"
+	"lingo/internal/config"
 
 	"golang.org/x/tools/go/analysis"
 )
@@ -66,15 +67,15 @@ func collectArgs(callExpr *ast.CallExpr, info *types.Info) []log.LogPart {
 	return parts
 }
 
-func handleLog(pass *analysis.Pass, callExpr *ast.CallExpr) {
+func handleLog(pass *analysis.Pass, callExpr *ast.CallExpr, cfg *config.Config) {
 	parts := collectArgs(callExpr, pass.TypesInfo)
 	if len(parts) == 0 {
 		return
 	}
-	analyzeMessage(pass, callExpr, parts)
+	analyzeMessage(pass, callExpr, parts, cfg)
 }
 
-func handleSlog(pass *analysis.Pass, callExpr *ast.CallExpr) {
+func handleSlog(pass *analysis.Pass, callExpr *ast.CallExpr, cfg *config.Config) {
 	if len(callExpr.Args) == 0 {
 		return
 	}
@@ -82,13 +83,13 @@ func handleSlog(pass *analysis.Pass, callExpr *ast.CallExpr) {
 	if len(parts) == 0 {
 		return
 	}
-	analyzeMessage(pass, callExpr, parts)
+	analyzeMessage(pass, callExpr, parts, cfg)
 }
 
-func handleZap(pass *analysis.Pass, callExpr *ast.CallExpr) {
+func handleZap(pass *analysis.Pass, callExpr *ast.CallExpr, cfg *config.Config) {
 	parts := collectArgs(callExpr, pass.TypesInfo)
 	if len(parts) == 0 {
 		return
 	}
-	analyzeMessage(pass, callExpr, parts)
+	analyzeMessage(pass, callExpr, parts, cfg)
 }
