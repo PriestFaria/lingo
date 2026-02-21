@@ -1,7 +1,7 @@
 //go:build e2e
 
 // Package e2e tests the full linter lifecycle:
-// build cmd/addcheck binary → run via go vet → verify diagnostics.
+// build cmd/lingo binary → run via go vet → verify diagnostics.
 //
 // Run with: go test -tags e2e ./test/e2e/
 package e2e_test
@@ -32,7 +32,7 @@ func buildLingo(t *testing.T) string {
 		binary += ".exe"
 	}
 	root := projectRoot(t)
-	cmd := exec.Command("go", "build", "-o", binary, filepath.Join(root, "cmd", "addcheck"))
+	cmd := exec.Command("go", "build", "-o", binary, filepath.Join(root, "cmd", "lingo"))
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("failed to build lingo: %s\n%s", err, out)
