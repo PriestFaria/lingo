@@ -1,0 +1,8 @@
+{
+  "filters": {
+    "first_letter": false,
+    "english": false,
+    "emoji": false,
+    "security": false
+  }
+}

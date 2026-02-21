@@ -1,0 +1,11 @@
+{
+  "filters": {
+    "first_letter": false,
+    "english": false,
+    "emoji": true,
+    "security": true
+  },
+  "security": {
+    "extra_keywords": ["cvv", "ssn"]
+  }
+}
