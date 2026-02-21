@@ -58,6 +58,38 @@ func Default() *Config {
     return &Config{}
 }
 
+// FromMap builds a Config from a map[string]any (e.g. from golangci-lint settings).
+// The map structure mirrors the JSON layout of .lingo.json:
+//
+//	map[string]any{
+//	    "filters": map[string]any{
+//	        "first_letter": false,
+//	        "english":      true,
+//	    },
+//	    "security": map[string]any{
+//	        "extra_keywords": []any{"cvv", "ssn"},
+//	    },
+//	}
+//
+// Unknown keys are silently ignored. An empty map returns Default().
+func FromMap(m map[string]any) (*Config, error) {
+	if len(m) == 0 {
+		return Default(), nil
+	}
+
+	data, err := json.Marshal(m)
+	if err != nil {
+		return nil, fmt.Errorf("lingo: cannot encode settings map: %w", err)
+	}
+
+	var cfg Config
+	if err := json.Unmarshal(data, &cfg); err != nil {
+		return nil, fmt.Errorf("lingo: cannot parse settings map: %w", err)
+	}
+
+	return &cfg, nil
+}
+
 // Load reads a Config from a JSON file at path.
 // If path is empty, Default() is returned.
 // Fields absent from the file keep their zero value (filter enabled).

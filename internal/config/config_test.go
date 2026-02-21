@@ -159,3 +159,99 @@ func writeTemp(t *testing.T, content string) string {
     }
     return path
 }
+
+// ── FromMap ─────────────────────────────────────────────────────────────────
+
+func TestFromMap_Empty_ReturnsDefault(t *testing.T) {
+    cfg, err := config.FromMap(map[string]any{})
+    if err != nil {
+        t.Fatalf("unexpected error: %v", err)
+    }
+    for _, name := range []string{"first_letter", "english", "emoji", "security"} {
+        if !cfg.Filters.IsEnabled(name) {
+            t.Errorf("filter %q should be enabled by default", name)
+        }
+    }
+    if len(cfg.Security.ExtraKeywords) != 0 {
+        t.Errorf("expected no extra_keywords, got %v", cfg.Security.ExtraKeywords)
+    }
+}
+
+func TestFromMap_InlineFilters(t *testing.T) {
+    f := false
+    _ = f
+    cfg, err := config.FromMap(map[string]any{
+        "filters": map[string]any{
+            "first_letter": false,
+            "english":      false,
+        },
+    })
+    if err != nil {
+        t.Fatalf("unexpected error: %v", err)
+    }
+    if cfg.Filters.IsEnabled("first_letter") {
+        t.Error("first_letter should be disabled")
+    }
+    if cfg.Filters.IsEnabled("english") {
+        t.Error("english should be disabled")
+    }
+    if !cfg.Filters.IsEnabled("emoji") {
+        t.Error("emoji should be enabled (not specified → default)")
+    }
+    if !cfg.Filters.IsEnabled("security") {
+        t.Error("security should be enabled (not specified → default)")
+    }
+}
+
+func TestFromMap_InlineExtraKeywords(t *testing.T) {
+    cfg, err := config.FromMap(map[string]any{
+        "security": map[string]any{
+            "extra_keywords": []any{"cvv", "ssn", "otp"},
+        },
+    })
+    if err != nil {
+        t.Fatalf("unexpected error: %v", err)
+    }
+    if len(cfg.Security.ExtraKeywords) != 3 {
+        t.Fatalf("expected 3 extra_keywords, got %d", len(cfg.Security.ExtraKeywords))
+    }
+    for _, name := range []string{"first_letter", "english", "emoji", "security"} {
+        if !cfg.Filters.IsEnabled(name) {
+            t.Errorf("filter %q should be enabled by default", name)
+        }
+    }
+}
+
+func TestFromMap_AllFiltersDisabled(t *testing.T) {
+    cfg, err := config.FromMap(map[string]any{
+        "filters": map[string]any{
+            "first_letter": false,
+            "english":      false,
+            "emoji":        false,
+            "security":     false,
+        },
+    })
+    if err != nil {
+        t.Fatalf("unexpected error: %v", err)
+    }
+    for _, name := range []string{"first_letter", "english", "emoji", "security"} {
+        if cfg.Filters.IsEnabled(name) {
+            t.Errorf("filter %q should be disabled", name)
+        }
+    }
+}
+
+func TestFromMap_UnknownKeysIgnored(t *testing.T) {
+    cfg, err := config.FromMap(map[string]any{
+        "unknown_key": "some_value",
+        "another":     42,
+    })
+    if err != nil {
+        t.Fatalf("unexpected error: %v", err)
+    }
+    for _, name := range []string{"first_letter", "english", "emoji", "security"} {
+        if !cfg.Filters.IsEnabled(name) {
+            t.Errorf("filter %q should be enabled (unknown keys ignored)", name)
+        }
+    }
+}
