@@ -67,6 +67,49 @@ func TestEmojiStrictFilter_Emoji(t *testing.T) {
 			isLiteral:  false,
 			wantIssues: 0,
 		},
+		// Ranges that were previously missing
+		{
+			name:       "supplemental symbols (🤌 U+1F90C) — issue",
+			value:      "request failed 🤌",
+			isLiteral:  true,
+			wantIssues: 1,
+		},
+		{
+			name:       "chess symbol (🨀 U+1FA00) — issue",
+			value:      "game over 🨀",
+			isLiteral:  true,
+			wantIssues: 1,
+		},
+		{
+			name:       "symbols extended-A (🪀 U+1FA80) — issue",
+			value:      "toy 🪀",
+			isLiteral:  true,
+			wantIssues: 1,
+		},
+		{
+			name:       "melting face (🫠 U+1FAE0) — issue",
+			value:      "something went wrong 🫠",
+			isLiteral:  true,
+			wantIssues: 1,
+		},
+		{
+			name:       "copyright sign (© U+00A9) — issue",
+			value:      "© corp",
+			isLiteral:  true,
+			wantIssues: 1,
+		},
+		{
+			name:       "snowflake (❄ U+2744) — issue",
+			value:      "cold ❄",
+			isLiteral:  true,
+			wantIssues: 1,
+		},
+		{
+			name:       "star (⭐ U+2B50) — issue",
+			value:      "great job ⭐",
+			isLiteral:  true,
+			wantIssues: 1,
+		},
 	}
 
 	for _, tc := range tests {
