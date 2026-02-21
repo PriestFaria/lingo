@@ -1,9 +1,9 @@
 //go:build e2e
 
-// Package e2e тестирует полный цикл работы линтера:
-// сборка бинарника cmd/addcheck → запуск через go vet → проверка диагностик.
+// Package e2e tests the full linter lifecycle:
+// build cmd/addcheck binary → run via go vet → verify diagnostics.
 //
-// Запуск: go test -tags e2e ./test/e2e/
+// Run with: go test -tags e2e ./test/e2e/
 package e2e_test
 
 import (
@@ -21,7 +21,7 @@ func projectRoot(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// test/e2e/ → на два уровня вверх
+	// test/e2e/ → two levels up to the repository root
 	return filepath.Join(wd, "..", "..")
 }
 
@@ -40,7 +40,7 @@ func buildLingo(t *testing.T) string {
 	return binary
 }
 
-// runVet запускает go vet без конфига в указанной директории.
+// runVet runs go vet without a config flag in the given directory.
 func runVet(t *testing.T, binary, projectDir string) (string, error) {
 	t.Helper()
 	cmd := exec.Command("go", "vet", "-vettool="+binary, "./...")
@@ -49,8 +49,8 @@ func runVet(t *testing.T, binary, projectDir string) (string, error) {
 	return string(out), err
 }
 
-// runVetWithConfig запускает go vet с флагом -config.
-// configPath должен быть абсолютным путём к .lingo.json.
+// runVetWithConfig runs go vet with the -config flag.
+// configPath must be an absolute path to a .lingo.json file.
 func runVetWithConfig(t *testing.T, binary, projectDir, configPath string) (string, error) {
 	t.Helper()
 	cmd := exec.Command("go", "vet", "-vettool="+binary, "-config="+configPath, "./...")
@@ -59,7 +59,7 @@ func runVetWithConfig(t *testing.T, binary, projectDir, configPath string) (stri
 	return string(out), err
 }
 
-// absConfig возвращает абсолютный путь к .lingo.json внутри testdata-проекта.
+// absConfig returns the absolute path to the .lingo.json file inside a testdata project.
 func absConfig(t *testing.T, projectName string) string {
 	t.Helper()
 	path, err := filepath.Abs(filepath.Join("testdata", projectName, ".lingo.json"))
@@ -69,9 +69,9 @@ func absConfig(t *testing.T, projectName string) string {
 	return path
 }
 
-// ── Существующие тесты ──────────────────────────────────────────────────────
+// ── Base tests ───────────────────────────────────────────────────────────────
 
-// TestE2E_CleanProject — линтер не должен ничего сообщать на чистом коде.
+// TestE2E_CleanProject verifies that the linter reports no issues on clean code.
 func TestE2E_CleanProject(t *testing.T) {
 	binary := buildLingo(t)
 	projectDir := filepath.Join("testdata", "clean-project")
@@ -82,7 +82,7 @@ func TestE2E_CleanProject(t *testing.T) {
 	}
 }
 
-// TestE2E_ViolationsProject — линтер должен найти все виды нарушений.
+// TestE2E_ViolationsProject verifies that the linter detects all violation types.
 func TestE2E_ViolationsProject(t *testing.T) {
 	binary := buildLingo(t)
 	projectDir := filepath.Join("testdata", "violations-project")
@@ -106,10 +106,10 @@ func TestE2E_ViolationsProject(t *testing.T) {
 	}
 }
 
-// ── Тесты с конфигурацией ───────────────────────────────────────────────────
+// ── Config tests ─────────────────────────────────────────────────────────────
 
-// TestE2E_Config_DisabledFilters — если все фильтры отключены в конфиге,
-// линтер не должен репортить ни одной ошибки, даже на коде с нарушениями.
+// TestE2E_Config_DisabledFilters verifies that when all filters are disabled
+// in the config the linter reports no issues, even on code with violations.
 func TestE2E_Config_DisabledFilters(t *testing.T) {
 	binary := buildLingo(t)
 	projectDir := filepath.Join("testdata", "disabled-filters-project")
@@ -121,8 +121,8 @@ func TestE2E_Config_DisabledFilters(t *testing.T) {
 	}
 }
 
-// TestE2E_Config_DisabledFilters_WithoutConfig — тот же код с нарушениями, но
-// без конфига — линтер должен найти ошибки (фильтры включены по умолчанию).
+// TestE2E_Config_DisabledFilters_WithoutConfig runs the same violation code
+// without a config and expects errors, because all filters are enabled by default.
 func TestE2E_Config_DisabledFilters_WithoutConfig(t *testing.T) {
 	binary := buildLingo(t)
 	projectDir := filepath.Join("testdata", "disabled-filters-project")
@@ -133,8 +133,8 @@ func TestE2E_Config_DisabledFilters_WithoutConfig(t *testing.T) {
 	}
 }
 
-// TestE2E_Config_ExtraKeywords — кастомные keywords (cvv, ssn, otp) из конфига
-// должны детектироваться наравне со встроенными (password).
+// TestE2E_Config_ExtraKeywords verifies that custom keywords (cvv, ssn, otp)
+// configured via extra_keywords are detected alongside built-in ones (password).
 func TestE2E_Config_ExtraKeywords(t *testing.T) {
 	binary := buildLingo(t)
 	projectDir := filepath.Join("testdata", "extra-keywords-project")
@@ -145,7 +145,7 @@ func TestE2E_Config_ExtraKeywords(t *testing.T) {
 		t.Fatalf("expected security issues but lingo found nothing\noutput:\n%s", out)
 	}
 
-	// каждый кастомный keyword должен быть задетектирован
+	// every custom keyword must be detected
 	expectedKeywords := []string{"cvv", "ssn", "otp"}
 	for _, kw := range expectedKeywords {
 		if !strings.Contains(out, kw) {
@@ -153,31 +153,32 @@ func TestE2E_Config_ExtraKeywords(t *testing.T) {
 		}
 	}
 
-	// встроенный keyword тоже должен работать
+	// built-in keyword must still be detected
 	if !strings.Contains(out, "password") {
 		t.Errorf("expected report for built-in keyword %q not found\nfull output:\n%s", "password", out)
 	}
 
-	// безопасная переменная requestID не должна срабатывать
+	// safe variable requestID must not trigger a false positive
 	if strings.Contains(out, "requestID") {
 		t.Errorf("false positive: requestID should not trigger security filter\nfull output:\n%s", out)
 	}
 
-	// все диагностики должны содержать стандартное сообщение
+	// all security diagnostics must carry the standard message
 	if !strings.Contains(out, "may expose sensitive data") {
 		t.Errorf("expected standard security message not found\nfull output:\n%s", out)
 	}
 }
 
-// TestE2E_Config_ExtraKeywords_NotDetectedWithoutConfig — без конфига кастомные
-// keywords (cvv, ssn, otp) не знакомы линтеру, "otp code sent" не срабатывает.
+// TestE2E_Config_ExtraKeywords_NotDetectedWithoutConfig verifies that without
+// a config the custom keywords (cvv, ssn, otp) are unknown to the linter and
+// do not trigger any diagnostics.
 func TestE2E_Config_ExtraKeywords_NotDetectedWithoutConfig(t *testing.T) {
 	binary := buildLingo(t)
 	projectDir := filepath.Join("testdata", "extra-keywords-project")
 
 	out, err := runVet(t, binary, projectDir)
 
-	// встроенный "password" всё ещё должен сработать
+	// built-in "password" must still be detected
 	if err == nil {
 		t.Fatalf("expected at least one issue (password), but lingo found nothing\noutput:\n%s", out)
 	}
@@ -185,7 +186,7 @@ func TestE2E_Config_ExtraKeywords_NotDetectedWithoutConfig(t *testing.T) {
 		t.Errorf("expected built-in 'password' detection\nfull output:\n%s", out)
 	}
 
-	// кастомные keywords НЕ должны срабатывать без конфига
+	// custom keywords must NOT fire without a config
 	for _, kw := range []string{"\"cvv\"", "\"ssn\"", "\"otp\""} {
 		if strings.Contains(out, kw) {
 			t.Errorf("unexpected detection of custom keyword %s without config\nfull output:\n%s", kw, out)
@@ -193,9 +194,9 @@ func TestE2E_Config_ExtraKeywords_NotDetectedWithoutConfig(t *testing.T) {
 	}
 }
 
-// TestE2E_Config_PartialDisabled — конфиг отключает first_letter, emoji, security.
-// English-фильтр остаётся включённым и должен поймать кириллицу.
-// Заглавные буквы при этом не должны вызывать диагностику.
+// TestE2E_Config_PartialDisabled uses a config that disables first_letter, emoji,
+// and security. The English filter remains enabled and must catch Cyrillic text;
+// uppercase first letters and sensitive variable names must not be reported.
 func TestE2E_Config_PartialDisabled(t *testing.T) {
 	binary := buildLingo(t)
 	projectDir := filepath.Join("testdata", "partial-disabled-project")
@@ -206,29 +207,29 @@ func TestE2E_Config_PartialDisabled(t *testing.T) {
 		t.Fatalf("expected English-filter issues but lingo found nothing\noutput:\n%s", out)
 	}
 
-	// English-фильтр должен сработать на кириллице
+	// English filter must fire on Cyrillic text
 	if !strings.Contains(out, "must be in English") {
 		t.Errorf("expected English filter diagnostic\nfull output:\n%s", out)
 	}
 
-	// first_letter отключён — заглавных ошибок быть не должно
+	// first_letter is disabled — no uppercase diagnostics expected
 	if strings.Contains(out, "must start with a lowercase letter") {
 		t.Errorf("first_letter filter should be disabled but reported an issue\nfull output:\n%s", out)
 	}
 
-	// security отключён — переменная token не должна срабатывать
+	// security is disabled — sensitive variable names must not be reported
 	if strings.Contains(out, "may expose sensitive data") {
 		t.Errorf("security filter should be disabled but reported an issue\nfull output:\n%s", out)
 	}
 
-	// emoji отключён — не должно быть диагностик по emoji
+	// emoji filter is disabled — no emoji diagnostics expected
 	if strings.Contains(out, "must not contain emoji") {
 		t.Errorf("emoji filter should be disabled but reported an issue\nfull output:\n%s", out)
 	}
 }
 
-// TestE2E_Config_InvalidConfig — невалидный JSON в конфиге должен приводить к
-// ошибке линтера, а не panic или silent fail.
+// TestE2E_Config_InvalidConfig verifies that a malformed JSON config causes
+// a readable linter error instead of a panic or silent failure.
 func TestE2E_Config_InvalidConfig(t *testing.T) {
 	binary := buildLingo(t)
 	projectDir := filepath.Join("testdata", "invalid-config-project")
@@ -239,14 +240,14 @@ func TestE2E_Config_InvalidConfig(t *testing.T) {
 		t.Fatalf("expected error for invalid config, but go vet exited successfully\noutput:\n%s", out)
 	}
 
-	// ошибка должна содержать внятное сообщение о конфиге
+	// the error output must mention the linter name
 	if !strings.Contains(out, "lingo") {
 		t.Errorf("expected error message to mention 'lingo'\nfull output:\n%s", out)
 	}
 }
 
-// TestE2E_Config_NonExistentConfig — путь к несуществующему конфигу должен
-// вернуть читаемую ошибку.
+// TestE2E_Config_NonExistentConfig verifies that a path to a missing config
+// file produces a readable error.
 func TestE2E_Config_NonExistentConfig(t *testing.T) {
 	binary := buildLingo(t)
 	projectDir := filepath.Join("testdata", "clean-project")
