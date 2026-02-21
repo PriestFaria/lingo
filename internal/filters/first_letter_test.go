@@ -89,3 +89,21 @@ func TestFirstLetterFilter_FixValue(t *testing.T) {
 		t.Errorf("Fix.NewText = %q, want %q", issues[0].Fix.NewText, "f")
 	}
 }
+
+func TestFirstLetterFilter_InvalidUTF8(t *testing.T) {
+	f := &FirstLetterFilter{}
+	ctx := makeCtx(makeParts("\xfe\xfd invalid", true))
+	issues := f.Apply(ctx)
+	if len(issues) != 0 {
+		t.Errorf("got %d issues, want 0 for invalid UTF-8 prefix", len(issues))
+	}
+}
+
+func TestFirstLetterFilter_AllNonLiterals(t *testing.T) {
+	f := &FirstLetterFilter{}
+	ctx := makeCtx(makeParts("SomeVar", false, "AnotherVar", false))
+	issues := f.Apply(ctx)
+	if len(issues) != 0 {
+		t.Errorf("got %d issues, want 0 when all parts are non-literals", len(issues))
+	}
+}

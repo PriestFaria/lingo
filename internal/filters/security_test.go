@@ -93,9 +93,53 @@ func TestSecurityFilter(t *testing.T) {
 	}
 }
 
+func TestSecurityFilter_NoFalsePositive_Authenticated(t *testing.T) {
+	f := &SecurityFilter{}
+	ctx := makeCtx(makeParts("authenticated", false))
+	issues := f.Apply(ctx)
+	if len(issues) != 0 {
+		t.Errorf("got %d issues, want 0 for 'authenticated' (should not match 'auth' as a substring)", len(issues))
+	}
+}
+
+func TestSecurityFilter_SplitWords_LeadingUnderscore(t *testing.T) {
+	f := &SecurityFilter{}
+	ctx := makeCtx(makeParts("_password", false))
+	issues := f.Apply(ctx)
+	if len(issues) != 1 {
+		t.Errorf("got %d issues, want 1 for '_password'", len(issues))
+	}
+}
+
+func TestSecurityFilter_SplitWords_AllCapsAcronym(t *testing.T) {
+	f := &SecurityFilter{}
+	ctx := makeCtx(makeParts("APIKey", false))
+	issues := f.Apply(ctx)
+	if len(issues) != 1 {
+		t.Errorf("got %d issues, want 1 for 'APIKey'", len(issues))
+	}
+}
+
+func TestSecurityFilter_SplitWords_SnakeCase_PRIVATE_KEY(t *testing.T) {
+	f := &SecurityFilter{}
+	ctx := makeCtx(makeParts("PRIVATE_KEY", false))
+	issues := f.Apply(ctx)
+	if len(issues) != 1 {
+		t.Errorf("got %d issues, want 1 for 'PRIVATE_KEY'", len(issues))
+	}
+}
+
+func TestSecurityFilter_EmptyParts(t *testing.T) {
+	f := &SecurityFilter{}
+	ctx := makeCtx(makeParts("", true, "", false))
+	issues := f.Apply(ctx)
+	if len(issues) != 0 {
+		t.Errorf("got %d issues, want 0 for empty parts", len(issues))
+	}
+}
+
 func TestSecurityFilter_MultipleVariables(t *testing.T) {
 	f := &SecurityFilter{}
-	// log.Info("user: " + password + " key=" + apiKey)
 	parts := makeParts(
 		"user: ", true,
 		"password", false,
@@ -104,7 +148,6 @@ func TestSecurityFilter_MultipleVariables(t *testing.T) {
 	)
 	ctx := makeCtx(parts)
 	issues := f.Apply(ctx)
-	// password (var) + " key=" (literal marker) + apiKey (var) = 3
 	if len(issues) != 3 {
 		t.Errorf("got %d issues, want 3", len(issues))
 	}

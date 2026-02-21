@@ -12,8 +12,6 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
-// collectPartsFromExpr рекурсивно обходит конкатенацию (+) и собирает LogPart.
-// BasicLit → IsLiteral=true, Ident → IsLiteral=false.
 func collectPartsFromExpr(expr ast.Expr, info *types.Info) []log.LogPart {
 	switch e := expr.(type) {
 	case *ast.BinaryExpr:
@@ -54,16 +52,11 @@ func collectArgs(callExpr *ast.CallExpr, info *types.Info) []log.LogPart {
 	if len(callExpr.Args) == 0 {
 		return nil
 	}
-	sel, ok := callExpr.Fun.(*ast.SelectorExpr)
-	if !ok {
-		return nil
-	}
+	sel := callExpr.Fun.(*ast.SelectorExpr)
 
 	var parts []log.LogPart
 	if isFormatMethod(sel.Sel.Name) {
-		// format string
 		parts = append(parts, collectPartsFromExpr(callExpr.Args[0], info)...)
-		// остальные аргументы — переменные
 		for _, arg := range callExpr.Args[1:] {
 			parts = append(parts, collectPartsFromExpr(arg, info)...)
 		}
