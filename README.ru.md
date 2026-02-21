@@ -60,10 +60,18 @@ go vet -vettool=$(go env GOPATH)/bin/lingo -config=.lingo.json ./...
 ```bash
 git clone https://github.com/PriestFaria/lingo.git
 cd lingo
-go build -buildmode=plugin -o /path/to/your/project/lingo.so ./plugin/
+
+# Узнайте, с какой версией Go собран ваш golangci-lint:
+golangci-lint version
+# Пример вывода: ... Go version: go1.25.0 ...
+
+# Соберите плагин той же версией Go (замените go1.25.0 на вашу):
+GOTOOLCHAIN=go1.25.0 go build -buildmode=plugin -o /path/to/your/project/lingo.so ./plugin/
 ```
 
-> Плагин требует сборки из исходников — это ограничение Go plugin system.
+> **Важно:** Плагин и golangci-lint должны быть собраны **одинаковой версией Go** вплоть до патча (например, оба `go1.25.0`). Несовпадение версий вызывает ошибку вида `plugin was built with a different version of package`. Это фундаментальное ограничение Go plugin system.
+>
+> Плагин требует сборки из исходников — это также ограничение Go plugin system.
 
 **2. Конфигурация `.golangci.yml`**
 

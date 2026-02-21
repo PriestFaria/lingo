@@ -60,10 +60,18 @@ go vet -vettool=$(go env GOPATH)/bin/lingo -config=.lingo.json ./...
 ```bash
 git clone https://github.com/PriestFaria/lingo.git
 cd lingo
-go build -buildmode=plugin -o /path/to/your/project/lingo.so ./plugin/
+
+# Find out the Go version your golangci-lint was built with:
+golangci-lint version
+# Example output: ... Go version: go1.25.0 ...
+
+# Build the plugin with that exact Go version (replace go1.25.0 with yours):
+GOTOOLCHAIN=go1.25.0 go build -buildmode=plugin -o /path/to/your/project/lingo.so ./plugin/
 ```
 
-> The plugin requires building from source — this is a limitation of the Go plugin system.
+> **Important:** The plugin and golangci-lint must be built with the **exact same Go version** down to the patch level (e.g., both `go1.25.0`). A mismatch causes an error like `plugin was built with a different version of package`. This is a fundamental limitation of the Go plugin system.
+>
+> The plugin also requires building from source for the same reason.
 
 **2. Configure `.golangci.yml`**
 
